@@ -202,10 +202,11 @@ MainEntryPoint (
     ASSERT (SignatureList->SignatureListSize == SignatureList->SignatureListSize);
     ASSERT (SignatureList->SignatureHeaderSize == 0);
     ASSERT (SignatureList->SignatureSize == SignatureList->SignatureListSize - (sizeof(EFI_SIGNATURE_LIST) + SignatureList->SignatureHeaderSize));
-    CertChain = (VOID *)((UINT8 *)SignatureList +
-                         sizeof(EFI_SIGNATURE_LIST) +
-                         SignatureList->SignatureHeaderSize +
-                         sizeof(EFI_GUID));
+    // CertChain = (VOID *)((UINT8 *)SignatureList +
+    //                      sizeof(EFI_SIGNATURE_LIST) +
+    //                      SignatureList->SignatureHeaderSize +
+    //                      sizeof(EFI_GUID));
+    CertChain = (VOID *)((UINT8 *)SignatureList);
     CertChainSize = SignatureList->SignatureSize - sizeof(EFI_GUID);
 
     ZeroMem (&Parameter, sizeof(Parameter));
