@@ -202,11 +202,10 @@ MainEntryPoint (
     ASSERT (SignatureList->SignatureListSize == SignatureList->SignatureListSize);
     ASSERT (SignatureList->SignatureHeaderSize == 0);
     ASSERT (SignatureList->SignatureSize == SignatureList->SignatureListSize - (sizeof(EFI_SIGNATURE_LIST) + SignatureList->SignatureHeaderSize));
-    // CertChain = (VOID *)((UINT8 *)SignatureList +
-    //                      sizeof(EFI_SIGNATURE_LIST) +
-    //                      SignatureList->SignatureHeaderSize +
-    //                      sizeof(EFI_GUID));
-    CertChain = (VOID *)((UINT8 *)SignatureList);
+    CertChain = (VOID *)((UINT8 *)SignatureList +
+                         sizeof(EFI_SIGNATURE_LIST) +
+                         SignatureList->SignatureHeaderSize +
+                         sizeof(EFI_GUID));
     CertChainSize = SignatureList->SignatureSize - sizeof(EFI_GUID);
 
     ZeroMem (&Parameter, sizeof(Parameter));
@@ -241,6 +240,8 @@ MainEntryPoint (
            SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_HANDSHAKE_IN_THE_CLEAR_CAP |
 //           SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_PUB_KEY_ID_CAP |
            0;
+  HasRspPubCert = FALSE;
+  HasRspPrivKey = FALSE;
   if (!HasRspPubCert) {
     Data32 &= ~SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CERT_CAP;
   } else {
