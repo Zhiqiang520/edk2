@@ -66,6 +66,8 @@ SpdmIoReceiveMessage (
   EFI_STATUS                Status;
   UINT32                    TmpSessionId;
   UINT32                    *SessionIdPtr;
+  UINT8                     current_req_res_code;
+  UINT8                     *SignatureRegion;
 
   SpdmTestContext = SPDM_TEST_DEVICE_CONTEXT_FROM_SPDM_IO_PROTOCOL(This);
   SpdmContext = SpdmTestContext->SpdmContext;
@@ -88,6 +90,13 @@ SpdmIoReceiveMessage (
 
   ZeroMem (*Message, *MessageSize);
   Status = SpdmBuildResponse (SpdmContext, SessionIdPtr, IsAppMessage, MessageSize, Message);
+  current_req_res_code = libspdm_get_request_response_code(SpdmContext);
+  DEBUG ((EFI_D_INFO, "current request_response_code is 0x%x\n", current_req_res_code));
+  if (current_req_res_code == SPDM_CHALLENGE) {
+    /* tamper CHALLENGE signature on purpose for test */
+    SignatureRegion = (uint8_t *)*Message + *MessageSize - 0xF;
+    *SignatureRegion = 0xF;
+  }
   if (EFI_ERROR(Status)) {
     DEBUG ((DEBUG_ERROR, "SpdmBuildResponse - %r\n", Status));
     return Status;
@@ -240,8 +249,6 @@ MainEntryPoint (
            SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_HANDSHAKE_IN_THE_CLEAR_CAP |
 //           SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_PUB_KEY_ID_CAP |
            0;
-  HasRspPubCert = FALSE;
-  HasRspPrivKey = FALSE;
   if (!HasRspPubCert) {
     Data32 &= ~SPDM_GET_CAPABILITIES_RESPONSE_FLAGS_CERT_CAP;
   } else {
