@@ -1,0 +1,63 @@
+  Event:
+    PCRIndex  - 7
+    EventType - 0x800000E3
+	
+	EventData - Type: EV_EFI_SPDM_DEVICE_POLICY
+      VariableName       - B9C2B4F4-BF5F-462D-8ADF-C5C70AC35DAD
+      UnicodeNameLength  - 0x0000000000000005
+      VariableDataLength - 0x0000000000000DDC
+      UnicodeName        - devdb
+	
+  Event:
+    PCRIndex  - 0x01C40200 (NvIndex)
+    EventType - 0x00000003
+	
+    EventData - Type: EV_NO_ACTION
+      TcgNvIndexInstanceEvent:
+        Signature       - 'NvIndexInstance '
+        Version         - 0x0000
+	TcgDeviceSecurityEvent2:
+      Signature         - 'SPDM Device Sec2'
+      Version           - 0x0002
+      Length            - 0x00000E4D
+      DeviceType        - 0x00000001
+      SubHeaderType     - 0x00000002
+	  SubHeaderLength   - 0x00000DDB
+	  
+      SpdmCertChainSubHeader:
+        SpdmVersion   - 0x0012
+        SpdmHashAlgo  - 0x00000001
+		
+  Event:
+    PCRIndex  - 7
+    EventType - 0x800000E4
+	
+    EventData - Type: EV_EFI_SPDM_DEVICE_AUTHORITY
+      VariableName       - B9C2B4F4-BF5F-462D-8ADF-C5C70AC35DAD
+      UnicodeNameLength  - 0x0000000000000005
+      VariableDataLength - 0x0000000000000DE4
+      UnicodeName        - devdb
+	  
+  Event:
+    PCRIndex  - 0x01C40201 (NvIndex)
+    EventType - 0x00000003
+
+    EventData - Type: EV_NO_ACTION
+      TcgNvIndexDynamicEvent:
+        Signature       - 'NvIndexDynamic  '
+        Version         - 0x0000
+        Uid             - 0x0000000000000001
+        DescriptionSize - 0x000F
+        Description     - "SPDM CHALLENGE "
+		
+  Event:
+    PCRIndex  - 0x01C40201 (NvIndex)
+    EventType - 0x00000003
+	
+    EventData - Type: EV_NO_ACTION
+      TcgNvIndexDynamicEvent:
+        Signature       - 'NvIndexDynamic  '
+        Version         - 0x0000
+        Uid             - 0x0000000000000001
+        DescriptionSize - 0x0014
+        Description     - "SPDM CHALLENGE_AUTH "

@@ -1,0 +1,20 @@
+Event:
+    PCRIndex  - 0x01C40200 (NvIndex)
+    EventType - 0x00000003
+	
+    EventData - Type: EV_NO_ACTION
+      TcgNvIndexInstanceEvent:
+        Signature       - 'NvIndexInstance '
+        Version         - 0x0000
+	TcgDeviceSecurityEvent2:
+      Signature         - 'SPDM Device Sec2'
+      Version           - 0x0002
+	  AuthState         - 0x03
+      Length            - 0x00000E4D
+      DeviceType        - 0x00000001
+      SubHeaderType     - 0x00000002
+	  SubHeaderLength   - 0x00000000
+	  
+      SpdmCertChainSubHeader:
+        SpdmVersion   - 0x0012
+        SpdmHashAlgo  - 0x00000001
