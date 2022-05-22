@@ -46,3 +46,4 @@
 [Guids]
   gEdkiiDeviceSignatureDatabaseGuid       ## CONSUMES
   gEdkiiCertSpdmCertChainGuid             ## CONSUMES
+  gEfiDeviceSecurityPkgTestConfig         ## CONSUMES

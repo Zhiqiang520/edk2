@@ -272,6 +272,7 @@ MainEntryPoint (
   LIST_ENTRY          *ParamPackage;
   CHAR16              *TestConfigName;
   UINT8               TestConfig;
+  UINT8               *TamperRegion;
 
   Status = ShellCommandLineParse (mParamList, &ParamPackage, NULL, TRUE);
   if (EFI_ERROR(Status)) {
@@ -306,15 +307,13 @@ MainEntryPoint (
   ASSERT (CertChain != NULL);
   CertChain->length = (UINT16)CertChainSize;
   CertChain->reserved = 0;
-  if (TestConfig != TEST_CONFIG_INVALID_CERT_CHAIN) {
-    Res = X509GetCertFromCertChain(TestRootCer, TestRootCerSize, 0, &RootCert,
-                                   &RootCertLen);
-    if (!Res) {
-      Print(L"fail to get root cert\n");
-      return EFI_DEVICE_ERROR;
-    }
-    Sha256HashAll (RootCert, RootCertLen, (VOID *)(CertChain + 1));
+  Res = X509GetCertFromCertChain(TestRootCer, TestRootCerSize, 0, &RootCert,
+                                  &RootCertLen);
+  if (!Res) {
+    Print(L"fail to get root cert\n");
+    return EFI_DEVICE_ERROR;
   }
+  Sha256HashAll (RootCert, RootCertLen, (VOID *)(CertChain + 1));
   CopyMem (
     (UINT8 *)CertChain + sizeof(SPDM_CERT_CHAIN) + SHA256_HASH_SIZE,
     TestRootCer,
@@ -349,6 +348,33 @@ MainEntryPoint (
   ASSERT_EFI_ERROR(Status);
   FreePool (SignatureList);
 
+  if (TestConfig == TEST_CONFIG_INVALID_CERT_CHAIN) {
+    TamperRegion = (uint8_t *)CertChain + CertChainSize - 1;
+    *TamperRegion = 0xFF;
+  } else if (TestConfig == TEST_CONFIG_TRUST_ANCHOR_NOT_IN_SEC_DATABASE) {
+    Res = X509GetCertFromCertChain(TestRootCer2, TestRootCer2Size, 0, &RootCert,
+                                    &RootCertLen);
+    if (!Res) {
+      Print(L"fail to get root cert\n");
+      return EFI_DEVICE_ERROR;
+    }
+    Sha256HashAll (RootCert, RootCertLen, (VOID *)(CertChain + 1));
+    CopyMem (
+      (UINT8 *)CertChain + sizeof(SPDM_CERT_CHAIN) + SHA256_HASH_SIZE,
+      TestRootCer2,
+      TestRootCer2Size
+      );
+  }
+
+  Status = gRT->SetVariable (
+                L"ProvisionSpdmCertChain",
+                &gEfiDeviceSecurityPkgTestConfig,
+                EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS,
+                CertChainSize,
+                CertChain
+                );
+  FreePool(CertChain);
+
   {
     //
     // TBD - we need only include the root-cert, instead of the CertChain
@@ -380,16 +406,27 @@ MainEntryPoint (
       );
     FreePool (SignatureList);
   }
-
-  Status = gRT->SetVariable (
-                  L"PrivDevKey",
-                  &gEdkiiDeviceSignatureDatabaseGuid,
-                  EFI_VARIABLE_NON_VOLATILE |
-                    EFI_VARIABLE_BOOTSERVICE_ACCESS |
-                    EFI_VARIABLE_RUNTIME_ACCESS,
-                  TestRootKeySize,
-                  TestRootKey
-                  );
+  if (TestConfig == TEST_CONFIG_TRUST_ANCHOR_NOT_IN_SEC_DATABASE) {
+    Status = gRT->SetVariable (
+                    L"PrivDevKey",
+                    &gEdkiiDeviceSignatureDatabaseGuid,
+                    EFI_VARIABLE_NON_VOLATILE |
+                      EFI_VARIABLE_BOOTSERVICE_ACCESS |
+                      EFI_VARIABLE_RUNTIME_ACCESS,
+                    TestRootKey2Size,
+                    TestRootKey2
+                    );
+  } else {
+    Status = gRT->SetVariable (
+                    L"PrivDevKey",
+                    &gEdkiiDeviceSignatureDatabaseGuid,
+                    EFI_VARIABLE_NON_VOLATILE |
+                      EFI_VARIABLE_BOOTSERVICE_ACCESS |
+                      EFI_VARIABLE_RUNTIME_ACCESS,
+                    TestRootKeySize,
+                    TestRootKey
+                    );
+  }
   ASSERT_EFI_ERROR(Status);
 
   return EFI_SUCCESS;

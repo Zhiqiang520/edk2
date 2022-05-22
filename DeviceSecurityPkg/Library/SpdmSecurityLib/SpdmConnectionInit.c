@@ -67,8 +67,6 @@ CreateSpdmDeviceContext (
   VOID                              *ScratchBuffer;
   UINTN                             ScratchBufferSize;
   EFI_STATUS                        Status;
-  EFI_SIGNATURE_LIST                *SignatureList;
-  UINTN                             SignatureListSize;
   VOID                              *Data;
   UINTN                             DataSize;
   SPDM_DATA_PARAMETER               Parameter;
@@ -155,24 +153,13 @@ CreateSpdmDeviceContext (
   RecordSpdmDeviceContextInList (SpdmDeviceContext);
 
   Status = GetVariable2 (
-             EDKII_DEVICE_SECURITY_DATABASE,
-             &gEdkiiDeviceSignatureDatabaseGuid,
-             &SignatureList,
-             &SignatureListSize
-             );
+            L"ProvisionSpdmCertChain",
+            &gEfiDeviceSecurityPkgTestConfig,
+            &Data,
+            &DataSize
+            );
   if (!EFI_ERROR(Status)) {
     // BUGBUG: Assume only 1 SPDM cert.
-    ASSERT (CompareGuid (&SignatureList->SignatureType, &gEdkiiCertSpdmCertChainGuid));
-    ASSERT (SignatureList->SignatureListSize == SignatureList->SignatureListSize);
-    ASSERT (SignatureList->SignatureHeaderSize == 0);
-    ASSERT (SignatureList->SignatureSize == SignatureList->SignatureListSize - (sizeof(EFI_SIGNATURE_LIST) + SignatureList->SignatureHeaderSize));
-
-    Data = (VOID *)((UINT8 *)SignatureList +
-                             sizeof(EFI_SIGNATURE_LIST) +
-                             SignatureList->SignatureHeaderSize +
-                             sizeof(EFI_GUID));
-    DataSize = SignatureList->SignatureSize - sizeof(EFI_GUID);
-
     ZeroMem (&Parameter, sizeof(Parameter));
     Parameter.location = SpdmDataLocationLocal;
     SpdmSetData (SpdmContext, SpdmDataPeerPublicCertChains, &Parameter, Data, DataSize);

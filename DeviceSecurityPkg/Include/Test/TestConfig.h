@@ -16,5 +16,6 @@
 #define TEST_CONFIG_INVALID_MEASUREMENT_SIGNATURE           5
 #define TEST_CONFIG_MEAS_WITHOUT_SIG_CAP                    6
 #define TEST_CONFIG_NO_ANY_MEAS_CAP                         7
+#define TEST_CONFIG_TRUST_ANCHOR_NOT_IN_SEC_DATABASE        8
 
 #endif
